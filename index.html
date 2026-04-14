@@ -16,10 +16,6 @@
       --shadow:0 8px 32px rgba(0,0,0,.5);--radius:10px;
     }
     html,body{height:100%;font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;-webkit-tap-highlight-color:transparent}
-
-    /* ════════════════════════════════
-       데스크탑 레이아웃 (기존 유지)
-    ════════════════════════════════ */
     .app{display:grid;grid-template-rows:56px 1fr;grid-template-columns:380px 1fr;height:100vh}
     header{grid-column:1/-1;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;z-index:10}
     .logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
@@ -56,16 +52,27 @@
     .info-card-header{padding:12px 14px;background:rgba(88,166,255,.06);border-bottom:1px solid var(--border)}
     .info-card-title{font-size:13px;font-weight:700;color:var(--text);line-height:1.5}
     .info-card-sub{font-size:10px;color:var(--text3);margin-top:3px;font-family:'JetBrains Mono',monospace}
-    .kpi-grid{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--border)}
-    .kpi-item{padding:14px 12px;display:flex;flex-direction:column;gap:4px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
-    .kpi-item:nth-child(2n){border-right:none}
-    .kpi-item:nth-last-child(-n+2){border-bottom:none}
+
+    /* KPI 그리드 - 3열로 확장 가능하도록 */
+    .kpi-grid{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)}
+    .kpi-grid.two-col{grid-template-columns:1fr 1fr}
+    .kpi-item{padding:12px 10px;display:flex;flex-direction:column;gap:3px;border-right:1px solid var(--border);border-bottom:1px solid var(--border)}
+    .kpi-item:nth-child(3n){border-right:none}
+    .kpi-grid.two-col .kpi-item:nth-child(2n){border-right:none}
+    .kpi-grid.two-col .kpi-item:nth-child(3n){border-right:1px solid var(--border)}
+    .kpi-item:nth-last-child(-n+3){border-bottom:none}
+    .kpi-grid.two-col .kpi-item:nth-last-child(-n+2){border-bottom:none}
+    .kpi-grid.two-col .kpi-item:nth-last-child(-n+3){border-bottom:1px solid var(--border)}
     .kpi-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
-    .kpi-val-area{font-size:22px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent2);line-height:1}
-    .kpi-val-unit{font-size:11px;color:var(--text2);margin-top:3px}
-    .kpi-val-text{font-size:14px;font-weight:600;color:var(--accent);font-family:'Noto Sans KR',sans-serif;line-height:1.3}
-    .kpi-val-warn{font-size:13px;font-weight:600;color:var(--accent3);font-family:'Noto Sans KR',sans-serif;line-height:1.3}
-    .kpi-val-owner{font-size:14px;font-weight:600;color:var(--text);font-family:'Noto Sans KR',sans-serif}
+    .kpi-val-area{font-size:20px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent2);line-height:1}
+    .kpi-val-unit{font-size:10px;color:var(--text2);margin-top:2px}
+    .kpi-val-text{font-size:13px;font-weight:600;color:var(--accent);font-family:'Noto Sans KR',sans-serif;line-height:1.3}
+    .kpi-val-warn{font-size:12px;font-weight:600;color:var(--accent3);font-family:'Noto Sans KR',sans-serif;line-height:1.3}
+    .kpi-val-owner{font-size:13px;font-weight:600;color:var(--text);font-family:'Noto Sans KR',sans-serif}
+    /* 준공연도 전용 스타일 */
+    .kpi-val-year{font-size:20px;font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--accent3);line-height:1}
+    .kpi-val-age{font-size:10px;color:var(--text2);margin-top:2px}
+
     .info-table{padding:2px 0}
     .info-row{display:flex;align-items:center;padding:7px 14px;border-bottom:1px solid var(--border);gap:10px}
     .info-row:last-child{border-bottom:none}
@@ -92,6 +99,7 @@
     .popup-v{font-weight:600;color:var(--text);text-align:right;font-family:'JetBrains Mono',monospace}
     .popup-v.area{color:var(--accent2);font-size:15px}
     .popup-v.tp{color:var(--accent3);font-family:'Noto Sans KR',sans-serif}
+    .popup-v.year{color:var(--accent3)}
     .leaflet-bar a{background:var(--surface)!important;color:var(--text)!important;border-color:var(--border)!important}
     .leaflet-bar a:hover{background:var(--surface2)!important}
     .leaflet-control-layers{background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:var(--radius)!important;color:var(--text)!important}
@@ -102,150 +110,45 @@
     .click-ripple{position:absolute;width:44px;height:44px;border-radius:50%;border:2px solid var(--accent);transform:translate(-50%,-50%) scale(0);animation:ripple .65s ease-out forwards;pointer-events:none;z-index:2000}
     @keyframes ripple{0%{transform:translate(-50%,-50%) scale(0);opacity:1}100%{transform:translate(-50%,-50%) scale(2.2);opacity:0}}
 
-    /* ════════════════════════════════
-       모바일 전용 추가 레이아웃
-       (767px 이하에서만 적용)
-    ════════════════════════════════ */
-    /* 모바일 전용 요소: 기본 숨김 */
-    .mobile-only { display: none; }
-
-    @media (max-width: 767px) {
-      /* 데스크탑 전용 요소 숨기기 */
-      .panel { display: none; }
-      .hint-text { display: none; }
-
-      /* 앱 그리드: 단일 컬럼으로 */
-      .app {
-        grid-template-columns: 1fr;
-        grid-template-rows: 52px 1fr;
-        height: 100vh;
-        height: 100dvh;
-      }
-
-      /* 지도가 전체 2행 차지 */
-      .map-wrap { grid-column: 1; grid-row: 2; }
-
-      /* 지도 힌트 위치 조정 */
-      .map-hint { bottom: 80px; font-size: 11px; padding: 6px 14px; }
-
-      /* 모바일 전용 요소 표시 */
-      .mobile-only { display: flex; }
-
-      /* ── 모바일 상단 검색바 (지도 위 플로팅) ── */
-      .m-search {
-        position: absolute;
-        top: calc(52px + 8px);
-        left: 10px; right: 10px;
-        z-index: 500;
-        gap: 6px;
-        align-items: center;
-      }
-      .m-search input {
-        flex: 1;
-        background: rgba(22,27,34,.95);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 10px 14px;
-        font-size: 14px;
-        color: var(--text);
-        font-family: 'Noto Sans KR', sans-serif;
-        outline: none;
-        -webkit-appearance: none;
-        box-shadow: var(--shadow);
-      }
-      .m-search input:focus { border-color: var(--accent); }
-      .m-search input::placeholder { color: var(--text3); }
-      .m-search .btn { flex-shrink: 0; padding: 10px 14px; box-shadow: var(--shadow); }
-
-      /* ── 모바일 바로가기 버튼 ── */
-      .m-quick {
-        position: absolute;
-        top: calc(52px + 56px);
-        left: 10px; right: 10px;
-        z-index: 500;
-        gap: 6px;
-        overflow-x: auto;
-        flex-wrap: nowrap;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-        padding-bottom: 2px;
-      }
-      .m-quick::-webkit-scrollbar { display: none; }
-      .m-quick .quick-btn {
-        flex-shrink: 0;
-        background: rgba(22,27,34,.92);
-        border-color: rgba(255,255,255,.1);
-        box-shadow: 0 2px 8px rgba(0,0,0,.4);
-        font-size: 12px;
-        padding: 5px 10px;
-      }
-
-      /* ── 하단 슬라이딩 패널 ── */
-      .m-panel {
-        flex-direction: column;
-        position: absolute;
-        bottom: 0; left: 0; right: 0;
-        z-index: 400;
-        background: var(--surface);
-        border-radius: 16px 16px 0 0;
-        box-shadow: 0 -4px 24px rgba(0,0,0,.6);
-        max-height: 70vh;
-        transition: transform .3s cubic-bezier(.4,0,.2,1);
-      }
-      .m-panel.closed { transform: translateY(calc(100% - 60px)); }
-      .m-panel.open   { transform: translateY(0); }
-
-      /* 드래그 핸들 */
-      .m-handle {
-        flex-direction: column;
-        align-items: center;
-        padding: 10px 14px 6px;
-        cursor: pointer;
-        flex-shrink: 0;
-        user-select: none;
-        -webkit-user-select: none;
-        gap: 6px;
-      }
-      .m-bar { width: 36px; height: 4px; background: var(--border); border-radius: 2px; }
-      .m-summary {
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 8px;
-      }
-      .m-sum-addr { font-size: 12px; font-weight: 500; color: var(--text); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-      .m-sum-area { font-size: 15px; font-weight: 700; color: var(--accent2); font-family: 'JetBrains Mono', monospace; flex-shrink: 0; }
-      .m-sum-empty { font-size: 12px; color: var(--text3); }
-
-      /* 상태바 */
-      .m-status {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        padding: 4px 14px 8px;
-        font-size: 11px;
-        color: var(--text3);
-        flex-shrink: 0;
-      }
-
-      /* 스크롤 내용 */
-      .m-content {
-        flex: 1;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        padding: 0 10px 24px;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
+    /* ══ 모바일 전용 ══ */
+    .mobile-only{display:none}
+    @media(max-width:767px){
+      .panel{display:none}
+      .hint-text{display:none}
+      .app{grid-template-columns:1fr;grid-template-rows:52px 1fr;height:100vh;height:100dvh}
+      .map-wrap{grid-column:1;grid-row:2}
+      .map-hint{bottom:80px;font-size:11px;padding:6px 14px}
+      .mobile-only{display:flex}
+      .m-search{position:absolute;top:calc(52px + 8px);left:10px;right:10px;z-index:500;gap:6px;align-items:center}
+      .m-search input{flex:1;background:rgba(22,27,34,.95);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;font-size:14px;color:var(--text);font-family:'Noto Sans KR',sans-serif;outline:none;-webkit-appearance:none;box-shadow:var(--shadow)}
+      .m-search input:focus{border-color:var(--accent)}
+      .m-search input::placeholder{color:var(--text3)}
+      .m-search .btn{flex-shrink:0;padding:10px 14px;box-shadow:var(--shadow)}
+      .m-quick{position:absolute;top:calc(52px + 56px);left:10px;right:10px;z-index:500;gap:6px;overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:2px}
+      .m-quick::-webkit-scrollbar{display:none}
+      .m-quick .quick-btn{flex-shrink:0;background:rgba(22,27,34,.92);border-color:rgba(255,255,255,.1);box-shadow:0 2px 8px rgba(0,0,0,.4);font-size:12px;padding:5px 10px}
+      .m-panel{flex-direction:column;position:absolute;bottom:0;left:0;right:0;z-index:400;background:var(--surface);border-radius:16px 16px 0 0;box-shadow:0 -4px 24px rgba(0,0,0,.6);max-height:72vh;transition:transform .3s cubic-bezier(.4,0,.2,1)}
+      .m-panel.closed{transform:translateY(calc(100% - 60px))}
+      .m-panel.open{transform:translateY(0)}
+      .m-handle{flex-direction:column;align-items:center;padding:10px 14px 6px;cursor:pointer;flex-shrink:0;user-select:none;-webkit-user-select:none;gap:6px}
+      .m-bar{width:36px;height:4px;background:var(--border);border-radius:2px}
+      .m-summary{width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px}
+      .m-sum-addr{font-size:12px;font-weight:500;color:var(--text);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .m-sum-area{font-size:15px;font-weight:700;color:var(--accent2);font-family:'JetBrains Mono',monospace;flex-shrink:0}
+      .m-sum-empty{font-size:12px;color:var(--text3)}
+      .m-status{display:flex;align-items:center;gap:6px;padding:4px 14px 8px;font-size:11px;color:var(--text3);flex-shrink:0}
+      .m-content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 10px 24px;display:flex;flex-direction:column;gap:8px}
+      /* 모바일에서 KPI 3열 → 폰트 작게 */
+      .kpi-val-area{font-size:16px}
+      .kpi-val-year{font-size:16px}
+      .kpi-item{padding:10px 8px}
     }
   </style>
 </head>
 <body>
 <div class="app">
 
-  <!-- ══ 헤더 (공통) ══ -->
+  <!-- 헤더 -->
   <header>
     <div class="logo"><span class="dot"></span>토지정보 조회</div>
     <span class="badge">Leaflet + VWorld WMTS</span>
@@ -253,7 +156,7 @@
     <span class="hint-text">🖱️ 지도 클릭 → 필지 정보 자동 조회</span>
   </header>
 
-  <!-- ══ 데스크탑: 좌측 패널 (기존 그대로) ══ -->
+  <!-- 데스크탑 패널 -->
   <aside class="panel">
     <div class="panel-section">
       <div class="section-label">주소로 이동</div>
@@ -286,19 +189,19 @@
     </div>
   </aside>
 
-  <!-- ══ 지도 (공통) ══ -->
+  <!-- 지도 -->
   <div class="map-wrap" id="mapWrap">
     <div id="map"></div>
     <div class="map-hint" id="mapHint">👆 지도 위 대지를 클릭하면 토지 정보를 조회합니다</div>
   </div>
 
-  <!-- ══ 모바일 전용: 상단 검색바 ══ -->
+  <!-- 모바일: 검색바 -->
   <div class="mobile-only m-search">
     <input id="mAddrInput" placeholder="주소 검색 (예: 성남동 2882)"/>
     <button class="btn btn-primary" id="mSearchBtn" onclick="mobileSearch()">검색</button>
   </div>
 
-  <!-- ══ 모바일 전용: 바로가기 ══ -->
+  <!-- 모바일: 바로가기 -->
   <div class="mobile-only m-quick">
     <button class="quick-btn" onclick="quickSearch('경기도 성남시 중원구 성남동 2882')">성남동 2882</button>
     <button class="quick-btn" onclick="quickSearch('서울특별시 강남구 역삼동 737')">역삼동 737</button>
@@ -307,9 +210,8 @@
     <button class="quick-btn" onclick="clearAll()">초기화</button>
   </div>
 
-  <!-- ══ 모바일 전용: 하단 슬라이딩 패널 ══ -->
+  <!-- 모바일: 하단 패널 -->
   <div class="mobile-only m-panel closed" id="mPanel">
-    <!-- 핸들 (탭으로 열기/닫기) -->
     <div class="m-handle" id="mHandle">
       <div class="m-bar"></div>
       <div class="m-summary">
@@ -317,12 +219,10 @@
         <span class="m-sum-area" id="mArea"></span>
       </div>
     </div>
-    <!-- 상태 -->
     <div class="m-status">
       <div class="status-dot ok" id="mStatusDot"></div>
       <span id="mStatusMsg">지도를 탭해 필지를 선택하세요</span>
     </div>
-    <!-- 내용 -->
     <div class="m-content" id="mobileResult">
       <div class="empty-state">
         <div class="icon">🏛️</div>
@@ -331,47 +231,39 @@
     </div>
   </div>
 
-</div><!-- /.app -->
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-/* ══════════════════════════════════════════
-   설정
-══════════════════════════════════════════ */
-var API_KEY  = '4E0AD412-BC5D-3976-8220-FD7C550431CE';
-var GEO_URL  = 'https://api.vworld.kr/req/address';
-var LAND_URL = 'https://api.vworld.kr/ned/data/ladfrlList';
+/* ══ 설정 ══ */
+var API_KEY    = '4E0AD412-BC5D-3976-8220-FD7C550431CE';
+var BLD_KEY    = '262UaaKgpdsminV6qlnLGdOq7KpFfEfTPk9jPZwt422PFHtMoAKfWyF3k3DFQWNUpVmdLpZw4ESve6h7hkw4uA==';
+var GEO_URL    = 'https://api.vworld.kr/req/address';
+var LAND_URL   = 'https://api.vworld.kr/ned/data/ladfrlList';
+var BLD_URL    = 'https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo';
+var THIS_YEAR  = new Date().getFullYear();
 var cbIdx = 0, currentMarker = null;
 var isMobile = function(){ return window.innerWidth <= 767; };
 
 /* ══ 하단 패널 토글 ══ */
 var panelOpen = false;
-
-document.getElementById('mHandle').addEventListener('click', function(){
-  togglePanel(!panelOpen);
-});
-
-// 드래그 제스처
+document.getElementById('mHandle').addEventListener('click', function(){ togglePanel(!panelOpen); });
 var touchStartY = null;
-document.getElementById('mHandle').addEventListener('touchstart', function(e){
-  touchStartY = e.touches[0].clientY;
-}, { passive: true });
+document.getElementById('mHandle').addEventListener('touchstart', function(e){ touchStartY = e.touches[0].clientY; }, {passive:true});
 document.addEventListener('touchmove', function(e){
   if (touchStartY === null) return;
   var dy = e.touches[0].clientY - touchStartY;
-  if (dy < -30)      { togglePanel(true);  touchStartY = null; }
-  else if (dy > 30)  { togglePanel(false); touchStartY = null; }
-}, { passive: true });
-document.addEventListener('touchend', function(){ touchStartY = null; });
-
-function togglePanel(open) {
+  if (dy < -30){ togglePanel(true); touchStartY=null; }
+  else if (dy > 30){ togglePanel(false); touchStartY=null; }
+}, {passive:true});
+document.addEventListener('touchend', function(){ touchStartY=null; });
+function togglePanel(open){
   panelOpen = open;
-  var p = document.getElementById('mPanel');
-  p.classList.toggle('open',   open);
-  p.classList.toggle('closed', !open);
+  document.getElementById('mPanel').classList.toggle('open', open);
+  document.getElementById('mPanel').classList.toggle('closed', !open);
 }
 
-/* ══ JSONP ══ */
+/* ══ JSONP (토지임야정보·지오코더용) ══ */
 function jsonp(url, params) {
   return new Promise(function(resolve, reject) {
     var cbName = '__cb' + (cbIdx++);
@@ -385,11 +277,45 @@ function jsonp(url, params) {
     s.src = url + '?' + qs;
     s.onerror = function(){ cleanup(); reject(new Error('연결 실패')); };
     document.head.appendChild(s);
-    function cleanup(){
-      clearTimeout(timer); delete window[cbName];
-      if (s.parentNode) s.parentNode.removeChild(s);
-    }
+    function cleanup(){ clearTimeout(timer); delete window[cbName]; if(s.parentNode) s.parentNode.removeChild(s); }
   });
+}
+
+/* ══ 건축물대장 API (fetch 방식, CORS 허용) ══ */
+async function fetchBldInfo(pnu) {
+  if (!pnu || pnu.length !== 19) return null;
+  // PNU 구조: 시군구(5) + 법정동(5) + 산여부(1) + 본번(4) + 부번(4)
+  var sigunguCd = pnu.substring(0, 5);
+  var bjdongCd  = pnu.substring(5, 10);
+  var bun       = String(parseInt(pnu.substring(11, 15), 10)); // 앞 0 제거
+  var ji        = String(parseInt(pnu.substring(15, 19), 10));
+
+  var url = BLD_URL
+    + '?serviceKey=' + encodeURIComponent(BLD_KEY)
+    + '&sigunguCd='  + sigunguCd
+    + '&bjdongCd='   + bjdongCd
+    + '&bun='        + bun
+    + '&numOfRows=1&pageNo=1&_type=json';
+
+  try {
+    var res  = await fetch(url);
+    var data = await res.json();
+    var items = data.response && data.response.body && data.response.body.items;
+    if (!items || !items.item || items.item.length === 0) return null;
+    var item = Array.isArray(items.item) ? items.item[0] : items.item;
+    return item;
+  } catch(e) {
+    console.warn('건축물대장 조회 실패:', e);
+    return null;
+  }
+}
+
+/* ══ 준공연도 파싱 ══ */
+function parseYear(useAprDay) {
+  if (!useAprDay || useAprDay.trim() === '') return null;
+  var s = useAprDay.trim().replace(/\D/g, '');
+  if (s.length >= 4) return s.substring(0, 4);
+  return null;
 }
 
 /* ══ PNU 19자리 조합 ══ */
@@ -417,7 +343,6 @@ function parseLandResponse(data) {
   }
   return null;
 }
-
 function normalizeField(f) {
   return {
     addr:   f.ldCodeNm       || '-',
@@ -433,30 +358,23 @@ function normalizeField(f) {
 }
 
 /* ══ Leaflet 지도 ══ */
-var map = L.map('map', { center: [37.5665, 126.9780], zoom: 14 });
-var baseLayer = L.tileLayer(
-  'https://api.vworld.kr/req/wmts/1.0.0/' + API_KEY + '/Base/{z}/{y}/{x}.png',
-  { maxZoom: 19, attribution: '© <a href="https://www.vworld.kr">VWorld</a>' }
-).addTo(map);
-var satLayer = L.tileLayer(
-  'https://api.vworld.kr/req/wmts/1.0.0/' + API_KEY + '/Satellite/{z}/{y}/{x}.jpeg',
-  { maxZoom: 19, attribution: '© VWorld' }
-);
-var hybridLayer = L.tileLayer(
-  'https://api.vworld.kr/req/wmts/1.0.0/' + API_KEY + '/Hybrid/{z}/{y}/{x}.png',
-  { maxZoom: 19, opacity: 0.9 }
-);
+var map = L.map('map', { center:[37.5665, 126.9780], zoom:14 });
+var baseLayer = L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/'+API_KEY+'/Base/{z}/{y}/{x}.png',
+  { maxZoom:19, attribution:'© <a href="https://www.vworld.kr">VWorld</a>' }).addTo(map);
+var satLayer  = L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/'+API_KEY+'/Satellite/{z}/{y}/{x}.jpeg',
+  { maxZoom:19, attribution:'© VWorld' });
+var hybridLayer = L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/'+API_KEY+'/Hybrid/{z}/{y}/{x}.png',
+  { maxZoom:19, opacity:0.9 });
 L.control.layers(
-  { '🗺️ 일반지도': baseLayer, '🛰️ 위성사진': satLayer },
-  { '📍 도로 오버레이': hybridLayer },
-  { position: 'topright' }
+  {'🗺️ 일반지도':baseLayer, '🛰️ 위성사진':satLayer},
+  {'📍 도로 오버레이':hybridLayer},
+  {position:'topright'}
 ).addTo(map);
 
-/* ══ 지도 클릭 ══ */
 map.on('click', function(e) {
   showRipple(e.originalEvent.clientX, e.originalEvent.clientY);
   document.getElementById('mapHint').classList.add('hide');
-  if (isMobile()) togglePanel(false); // 클릭 직후 패널 닫아 지도 보이게
+  if (isMobile()) togglePanel(false);
   clickAndFetch(e.latlng.lng, e.latlng.lat);
 });
 
@@ -468,17 +386,17 @@ function showRipple(x, y) {
   el.style.left = (x - rect.left) + 'px';
   el.style.top  = (y - rect.top)  + 'px';
   wrap.appendChild(el);
-  setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 700);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 700);
 }
 
-/* ══ 클릭 → 역지오코딩 → PNU → 토지조회 ══ */
+/* ══ 클릭 → 역지오코딩 → PNU → 토지+건축물 병렬 조회 ══ */
 async function clickAndFetch(lon, lat) {
   setStatus('위치 분석 중...', 'loading');
   var addr = '', pnu = '';
   try {
     var geoData = await jsonp(GEO_URL, {
-      service: 'address', request: 'getAddress', key: API_KEY,
-      point: lon + ',' + lat, type: 'PARCEL', format: 'json', errorFormat: 'json'
+      service:'address', request:'getAddress', key:API_KEY,
+      point: lon+','+lat, type:'PARCEL', format:'json', errorFormat:'json'
     });
     if (geoData.response && geoData.response.status === 'OK') {
       var r = Array.isArray(geoData.response.result)
@@ -488,55 +406,17 @@ async function clickAndFetch(lon, lat) {
         pnu  = buildPNU(r.structure.level4LC || '', r.structure.level5 || '');
       }
     }
-  } catch(e) { console.warn('역지오코딩 오류:', e); }
+  } catch(e) { console.warn('역지오코딩:', e); }
 
   if (addr) document.getElementById('addrInput').value = addr;
-  setStatus('토지 정보 조회 중...', 'loading');
-  await fetchLandByPNU(lon, lat, pnu, addr);
-}
-
-/* ══ PNU로 토지임야정보 조회 ══ */
-async function fetchLandByPNU(lon, lat, pnu, addr) {
-  if (!pnu || pnu.length !== 19) {
-    renderNoData(lon, lat, addr, pnu, 'PNU를 생성할 수 없습니다<br><small>건물·도로·강 위는 조회 불가 — 필지(땅) 위를 클릭하세요</small>');
-    placeMarkerSimple(lat, lon);
-    map.setView([lat, lon], 18);
-    return;
-  }
-  try {
-    var data = await jsonp(LAND_URL, {
-      key: API_KEY, domain: 'https://cune54-bit.github.io',
-      format: 'json', numOfRows: '1', pageNo: '1', pnu: pnu
-    });
-    var fields = parseLandResponse(data);
-    if (fields && fields.length > 0) {
-      var f = normalizeField(fields[0]);
-      var fullAddr = f.addr + (f.jibun !== '-' ? ' ' + f.jibun : '');
-      if (addr && addr.length > fullAddr.length) fullAddr = addr;
-      renderInfoCard(f, fullAddr, lon, lat);
-      placeMarker(lat, lon, f, fullAddr);
-      map.setView([lat, lon], 18);
-      setStatus('조회 완료 ✓', 'ok');
-      // 모바일: 조회 완료 후 패널 올리기
-      if (isMobile()) setTimeout(function(){ togglePanel(true); }, 500);
-    } else {
-      renderNoData(lon, lat, addr, pnu, '해당 필지 토지정보가 없습니다');
-      placeMarkerSimple(lat, lon);
-      map.setView([lat, lon], 18);
-      if (isMobile()) setTimeout(function(){ togglePanel(true); }, 500);
-    }
-  } catch(e) {
-    renderNoData(lon, lat, addr, pnu, '조회 오류: ' + e.message);
-    placeMarkerSimple(lat, lon);
-    map.setView([lat, lon], 18);
-    console.warn(e);
-  }
+  setStatus('토지 및 건축물 정보 조회 중...', 'loading');
+  await fetchAllInfo(lon, lat, pnu, addr);
 }
 
 /* ══ 주소 검색 ══ */
 async function searchAddress() {
   var addr = document.getElementById('addrInput').value.trim();
-  if (!addr) { setStatus('주소를 입력해주세요', 'err'); return; }
+  if (!addr) return;
   await doSearch(addr, document.getElementById('searchBtn'));
 }
 async function mobileSearch() {
@@ -547,29 +427,29 @@ async function mobileSearch() {
 }
 async function doSearch(addr, btn) {
   setStatus('주소 변환 중...', 'loading');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>'; }
+  if (btn) { btn.disabled=true; btn.innerHTML='<span class="spinner"></span>'; }
   try {
     var data = await jsonp(GEO_URL, {
-      service: 'address', request: 'getcoord', key: API_KEY,
-      address: addr, type: 'PARCEL', format: 'json', errorFormat: 'json', verbose: 'true'
+      service:'address', request:'getcoord', key:API_KEY,
+      address:addr, type:'PARCEL', format:'json', errorFormat:'json', verbose:'true'
     });
     if (!data.response || data.response.status !== 'OK') {
       setStatus('주소를 찾을 수 없습니다', 'err'); return;
     }
-    var pt  = data.response.result.point;
+    var pt = data.response.result.point;
     var lon = parseFloat(pt.x), lat = parseFloat(pt.y);
     var pnu = '';
     if (data.response.refined && data.response.refined.structure) {
       var st = data.response.refined.structure;
-      pnu = buildPNU(st.level4LC || '', st.level5 || '');
+      pnu = buildPNU(st.level4LC||'', st.level5||'');
     }
     document.getElementById('mapHint').classList.add('hide');
-    setStatus('토지 정보 조회 중...', 'loading');
-    await fetchLandByPNU(lon, lat, pnu, addr);
+    setStatus('토지 및 건축물 정보 조회 중...', 'loading');
+    await fetchAllInfo(lon, lat, pnu, addr);
   } catch(e) {
-    setStatus('오류: ' + e.message, 'err');
+    setStatus('오류: '+e.message, 'err');
   } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = '검색'; }
+    if (btn) { btn.disabled=false; btn.innerHTML='검색'; }
   }
 }
 function quickSearch(addr) {
@@ -578,57 +458,154 @@ function quickSearch(addr) {
   doSearch(addr, null);
 }
 
-/* ══ 카드 렌더링 ══ */
-function makeCardHTML(f, fullAddr, lon, lat) {
+/* ══ 토지임야정보 + 건축물대장 병렬 조회 ══ */
+async function fetchAllInfo(lon, lat, pnu, addr) {
+  if (!pnu || pnu.length !== 19) {
+    renderNoData(lon, lat, addr, pnu, 'PNU를 생성할 수 없습니다<br><small>건물·도로·강 위는 조회 불가 — 필지(땅) 위를 클릭하세요</small>');
+    placeMarkerSimple(lat, lon);
+    map.setView([lat, lon], 18);
+    return;
+  }
+
+  try {
+    // 토지임야정보 + 건축물대장 병렬 조회
+    var results = await Promise.allSettled([
+      jsonp(LAND_URL, {
+        key:API_KEY, domain:'https://cune54-bit.github.io',
+        format:'json', numOfRows:'1', pageNo:'1', pnu:pnu
+      }),
+      fetchBldInfo(pnu)
+    ]);
+
+    var landData = results[0].status === 'fulfilled' ? results[0].value : null;
+    var bldItem  = results[1].status === 'fulfilled' ? results[1].value : null;
+
+    var fields = parseLandResponse(landData);
+
+    if (fields && fields.length > 0) {
+      var f = normalizeField(fields[0]);
+      var fullAddr = f.addr + (f.jibun !== '-' ? ' ' + f.jibun : '');
+      if (addr && addr.length > fullAddr.length) fullAddr = addr;
+
+      // 준공연도 추출
+      var yearStr = bldItem ? parseYear(bldItem.useAprDay) : null;
+      var bldInfo = bldItem ? {
+        year:     yearStr,
+        purpose:  bldItem.mainPurpsCdNm || '-',
+        floors:   (bldItem.grndFlrCnt ? '지상 ' + bldItem.grndFlrCnt + '층' : '') +
+                  (bldItem.ugrndFlrCnt && bldItem.ugrndFlrCnt > 0 ? ' / 지하 ' + bldItem.ugrndFlrCnt + '층' : ''),
+        struct:   bldItem.strctCdNm || '-',
+        area_bld: bldItem.archArea  || null,   // 건축면적
+        area_tot: bldItem.totArea   || null,   // 연면적
+        roadAddr: bldItem.newPlatPlc || ''
+      } : null;
+
+      renderInfoCard(f, fullAddr, lon, lat, bldInfo);
+      placeMarker(lat, lon, f, fullAddr, bldInfo);
+      map.setView([lat, lon], 18);
+      setStatus('조회 완료 ✓', 'ok');
+      if (isMobile()) setTimeout(function(){ togglePanel(true); }, 500);
+    } else {
+      renderNoData(lon, lat, addr, pnu, '해당 필지 토지정보가 없습니다');
+      placeMarkerSimple(lat, lon);
+      map.setView([lat, lon], 18);
+      if (isMobile()) setTimeout(function(){ togglePanel(true); }, 500);
+    }
+  } catch(e) {
+    renderNoData(lon, lat, addr, pnu, '조회 오류: '+e.message);
+    placeMarkerSimple(lat, lon);
+    map.setView([lat, lon], 18);
+    console.warn(e);
+  }
+}
+
+/* ══ 카드 HTML 생성 ══ */
+function makeCardHTML(f, fullAddr, lon, lat, bld) {
   var areaNum  = f.area !== '-' ? Number(f.area) : null;
   var areaDisp = areaNum ? areaNum.toLocaleString() : '-';
+  var yearDisp = bld && bld.year ? bld.year : '-';
+  var ageDisp  = (bld && bld.year)
+    ? (THIS_YEAR - parseInt(bld.year, 10)) + '년 경과'
+    : '';
+
+  // KPI: 대지면적 / 지목 / 준공연도 / 소유구분
+  var kpiHtml =
+    '<div class="kpi-grid">'
+
+    + '<div class="kpi-item"><span class="kpi-label">대지면적</span>'
+    + '<span class="kpi-val-area">' + areaDisp + '</span>'
+    + '<span class="kpi-val-unit">㎡</span></div>'
+
+    + '<div class="kpi-item"><span class="kpi-label">지목</span>'
+    + '<span class="kpi-val-text">' + f.type + '</span>'
+    + '<span class="kpi-val-unit">' + f.regstr + '</span></div>'
+
+    + '<div class="kpi-item"><span class="kpi-label">준공연도</span>'
+    + '<span class="kpi-val-year">' + yearDisp + '</span>'
+    + '<span class="kpi-val-age">' + ageDisp + '</span></div>'
+
+    + '<div class="kpi-item"><span class="kpi-label">소유구분</span>'
+    + '<span class="kpi-val-owner">' + f.owner + '</span>'
+    + '<span class="kpi-val-unit">용도지역: <a href="https://eum.go.kr" target="_blank" style="color:var(--accent);text-decoration:none">토지이음</a></span></div>'
+
+    + '</div>';
+
+  // 추가 정보 테이블
+  var tableRows = '';
+  if (bld && bld.purpose !== '-') {
+    tableRows += '<div class="info-row"><span class="info-key">주용도</span><span class="info-val normal">' + bld.purpose + '</span></div>';
+  }
+  if (bld && bld.floors) {
+    tableRows += '<div class="info-row"><span class="info-key">층수</span><span class="info-val normal">' + bld.floors + '</span></div>';
+  }
+  if (bld && bld.struct !== '-') {
+    tableRows += '<div class="info-row"><span class="info-key">구조</span><span class="info-val normal">' + bld.struct + '</span></div>';
+  }
+  if (bld && bld.area_bld) {
+    tableRows += '<div class="info-row"><span class="info-key">건축면적</span><span class="info-val">' + Number(bld.area_bld).toLocaleString() + ' ㎡</span></div>';
+  }
+  if (bld && bld.area_tot) {
+    tableRows += '<div class="info-row"><span class="info-key">연면적</span><span class="info-val">' + Number(bld.area_tot).toLocaleString() + ' ㎡</span></div>';
+  }
+  if (bld && bld.roadAddr) {
+    tableRows += '<div class="info-row"><span class="info-key">도로명</span><span class="info-val normal" style="font-size:11px">' + bld.roadAddr + '</span></div>';
+  }
+  tableRows += '<div class="info-row"><span class="info-key">토지수정</span><span class="info-val">' + f.date + '</span></div>';
+  tableRows += '<div class="info-row"><span class="info-key">좌표</span><span class="info-val" style="font-size:10px">' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '</span></div>';
+
   return '<div class="info-card">'
     + '<div class="info-card-header">'
     + '<div class="info-card-title">📍 ' + fullAddr + '</div>'
     + '<div class="info-card-sub">' + f.pnu + '</div>'
     + '</div>'
-    + '<div class="kpi-grid">'
-    + '<div class="kpi-item"><span class="kpi-label">대지면적</span>'
-    + '<span class="kpi-val-area">' + areaDisp + '</span>'
-    + '<span class="kpi-val-unit">㎡ (제곱미터)</span></div>'
-    + '<div class="kpi-item"><span class="kpi-label">지목</span>'
-    + '<span class="kpi-val-text">' + f.type + '</span>'
-    + '<span class="kpi-val-unit">' + f.regstr + '</span></div>'
-    + '<div class="kpi-item"><span class="kpi-label">용도지역</span>'
-    + '<span class="kpi-val-warn" style="font-size:11px">토지이음에서 확인</span>'
-    + '<span class="kpi-val-unit"><a href="https://eum.go.kr" target="_blank" style="color:var(--accent);text-decoration:none">eum.go.kr →</a></span></div>'
-    + '<div class="kpi-item"><span class="kpi-label">소유구분</span>'
-    + '<span class="kpi-val-owner">' + f.owner + '</span></div>'
-    + '</div>'
-    + '<div class="info-table">'
-    + '<div class="info-row"><span class="info-key">측량구분</span><span class="info-val normal">' + f.scan + '</span></div>'
-    + '<div class="info-row"><span class="info-key">최종수정</span><span class="info-val">' + f.date + '</span></div>'
-    + '<div class="info-row"><span class="info-key">좌표</span><span class="info-val" style="font-size:10px">' + lat.toFixed(6) + ', ' + lon.toFixed(6) + '</span></div>'
-    + '</div></div>';
+    + kpiHtml
+    + '<div class="info-table">' + tableRows + '</div>'
+    + '</div>';
 }
 
-function renderInfoCard(f, fullAddr, lon, lat) {
-  var html = makeCardHTML(f, fullAddr, lon, lat);
-  // 데스크탑 결과
+function renderInfoCard(f, fullAddr, lon, lat, bld) {
+  var html = makeCardHTML(f, fullAddr, lon, lat, bld);
   document.getElementById('desktopResult').innerHTML = html;
-  // 모바일 결과
-  document.getElementById('mobileResult').innerHTML = html;
+  document.getElementById('mobileResult').innerHTML  = html;
   // 모바일 핸들 요약
   var areaDisp = f.area !== '-' ? Number(f.area).toLocaleString() + ' ㎡' : '';
-  document.getElementById('mSummary').outerHTML =
-    '<span class="m-sum-addr" id="mSummary">' + fullAddr.split(' ').slice(-3).join(' ') + '</span>';
+  var el = document.getElementById('mSummary');
+  el.className = 'm-sum-addr';
+  el.textContent = fullAddr.split(' ').slice(-3).join(' ');
   document.getElementById('mArea').textContent = areaDisp;
 }
 
 function renderNoData(lon, lat, addr, pnu, msg) {
   var html = '<div class="info-card">'
-    + '<div class="info-card-header"><div class="info-card-title">📍 ' + (addr||'위치 정보') + '</div>'
-    + '<div class="info-card-sub">' + (pnu||'-') + '</div></div>'
-    + '<div style="padding:16px 14px;font-size:13px;color:var(--text2);line-height:1.8">' + (msg||'토지 정보 없음') + '</div>'
+    + '<div class="info-card-header"><div class="info-card-title">📍 '+(addr||'위치 정보')+'</div>'
+    + '<div class="info-card-sub">'+(pnu||'-')+'</div></div>'
+    + '<div style="padding:16px 14px;font-size:13px;color:var(--text2);line-height:1.8">'+(msg||'토지 정보 없음')+'</div>'
     + '</div>';
   document.getElementById('desktopResult').innerHTML = html;
   document.getElementById('mobileResult').innerHTML  = html;
-  document.getElementById('mSummary').textContent = '정보 없음 — 다른 위치를 탭하세요';
+  var el = document.getElementById('mSummary');
+  el.className = 'm-sum-empty';
+  el.textContent = '정보 없음 — 다른 위치를 탭하세요';
   document.getElementById('mArea').textContent = '';
   setStatus('정보 없음', 'err');
 }
@@ -636,77 +613,62 @@ function renderNoData(lon, lat, addr, pnu, msg) {
 /* ══ 마커 ══ */
 function makeIcon(label, color) {
   color = color || '#58a6ff';
-  var safe = String(label||'').replace(/[<>&"]/g, function(c){
-    return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];
-  });
+  var safe = String(label||'').replace(/[<>&"]/g,function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});
   var svg = '<svg xmlns="http://www.w3.org/2000/svg" width="56" height="70" viewBox="0 0 56 70">'
-    + '<circle cx="28" cy="24" r="22" fill="' + color + '" opacity=".18"/>'
-    + '<circle cx="28" cy="24" r="15" fill="' + color + '"/>'
-    + '<circle cx="28" cy="24" r="6"  fill="white"/>'
-    + '<path d="M28 54 L20 36 Q28 40 36 36 Z" fill="' + color + '"/>'
-    + '<text x="28" y="67" text-anchor="middle" font-size="8" font-weight="bold" fill="' + color + '" font-family="sans-serif">' + safe + '</text>'
-    + '</svg>';
-  return L.divIcon({ html:svg, iconSize:[56,70], iconAnchor:[28,66], popupAnchor:[0,-68], className:'' });
+    +'<circle cx="28" cy="24" r="22" fill="'+color+'" opacity=".18"/>'
+    +'<circle cx="28" cy="24" r="15" fill="'+color+'"/>'
+    +'<circle cx="28" cy="24" r="6" fill="white"/>'
+    +'<path d="M28 54 L20 36 Q28 40 36 36 Z" fill="'+color+'"/>'
+    +'<text x="28" y="67" text-anchor="middle" font-size="8" font-weight="bold" fill="'+color+'" font-family="sans-serif">'+safe+'</text>'
+    +'</svg>';
+  return L.divIcon({html:svg,iconSize:[56,70],iconAnchor:[28,66],popupAnchor:[0,-68],className:''});
 }
 
-function placeMarker(lat, lon, f, fullAddr) {
+function placeMarker(lat, lon, f, fullAddr, bld) {
   if (currentMarker) map.removeLayer(currentMarker);
-  var areaDisp = f.area !== '-' ? Number(f.area).toLocaleString() + '㎡' : '-';
-  var popup = '<div class="popup-head">' + fullAddr.split(' ').slice(-3).join(' ') + '</div>'
-    + '<div class="popup-body">'
-    + '<div class="popup-row"><span class="popup-k">대지면적</span><span class="popup-v area">' + (f.area!=='-'?Number(f.area).toLocaleString()+' ㎡':'-') + '</span></div>'
-    + '<div class="popup-row"><span class="popup-k">지목</span><span class="popup-v tp">' + f.type + '</span></div>'
-    + '<div class="popup-row"><span class="popup-k">용도지역</span><span class="popup-v tp"><a href="https://eum.go.kr" target="_blank" style="color:var(--accent)">토지이음 확인</a></span></div>'
-    + '<div class="popup-row"><span class="popup-k">소유구분</span><span class="popup-v">' + f.owner + '</span></div>'
-    + '</div>';
-  currentMarker = L.marker([lat,lon], { icon: makeIcon(areaDisp, '#3fb950') })
-    .addTo(map).bindPopup(popup, { maxWidth: 280 }).openPopup();
+  var areaDisp = f.area!=='-' ? Number(f.area).toLocaleString()+'㎡' : '-';
+  var yearDisp = bld && bld.year ? bld.year : '-';
+  var popup =
+    '<div class="popup-head">'+fullAddr.split(' ').slice(-3).join(' ')+'</div>'
+    +'<div class="popup-body">'
+    +'<div class="popup-row"><span class="popup-k">대지면적</span><span class="popup-v area">'+(f.area!=='-'?Number(f.area).toLocaleString()+' ㎡':'-')+'</span></div>'
+    +'<div class="popup-row"><span class="popup-k">지목</span><span class="popup-v tp">'+f.type+'</span></div>'
+    +'<div class="popup-row"><span class="popup-k">준공연도</span><span class="popup-v year">'+yearDisp+'</span></div>'
+    +'<div class="popup-row"><span class="popup-k">주용도</span><span class="popup-v tp">'+(bld&&bld.purpose?bld.purpose:'-')+'</span></div>'
+    +'<div class="popup-row"><span class="popup-k">소유구분</span><span class="popup-v">'+f.owner+'</span></div>'
+    +'</div>';
+  currentMarker = L.marker([lat,lon],{icon:makeIcon(areaDisp,'#3fb950')})
+    .addTo(map).bindPopup(popup,{maxWidth:280}).openPopup();
 }
 function placeMarkerSimple(lat, lon) {
   if (currentMarker) map.removeLayer(currentMarker);
-  currentMarker = L.marker([lat,lon], { icon: makeIcon('', '#58a6ff') }).addTo(map);
+  currentMarker = L.marker([lat,lon],{icon:makeIcon('','#58a6ff')}).addTo(map);
 }
 
 /* ══ 유틸 ══ */
 function clearAll() {
-  ['addrInput','mAddrInput'].forEach(function(id){ document.getElementById(id).value = ''; });
+  ['addrInput','mAddrInput'].forEach(function(id){ document.getElementById(id).value=''; });
   var emptyHTML = '<div class="empty-state"><div class="icon">🏛️</div><p><strong>지도를 클릭</strong>하면<br>해당 필지의 토지 정보가<br>자동으로 표시됩니다</p></div>';
   document.getElementById('desktopResult').innerHTML = emptyHTML;
   document.getElementById('mobileResult').innerHTML  = emptyHTML;
   var el = document.getElementById('mSummary');
-  if (el) { el.className = 'm-sum-empty'; el.textContent = '👆 지도를 탭해 필지를 선택하세요'; }
-  document.getElementById('mArea').textContent = '';
-  if (currentMarker) { map.removeLayer(currentMarker); currentMarker = null; }
+  el.className='m-sum-empty'; el.textContent='👆 지도를 탭해 필지를 선택하세요';
+  document.getElementById('mArea').textContent='';
+  if (currentMarker){ map.removeLayer(currentMarker); currentMarker=null; }
   document.getElementById('mapHint').classList.remove('hide');
   if (isMobile()) togglePanel(false);
   setStatus('지도를 클릭해 필지를 선택하세요', '');
 }
-
 function setStatus(msg, type) {
-  // 데스크탑
-  var dot = document.getElementById('statusDot');
-  var txt = document.getElementById('statusMsg');
-  if (dot) dot.className = 'status-dot' + (type ? ' ' + type : '');
-  if (txt) txt.textContent = msg;
-  // 모바일
-  var mdot = document.getElementById('mStatusDot');
-  var mtxt = document.getElementById('mStatusMsg');
-  if (mdot) mdot.className = 'status-dot' + (type ? ' ' + type : '');
-  if (mtxt) mtxt.textContent = msg;
+  ['statusDot','mStatusDot'].forEach(function(id){
+    document.getElementById(id).className='status-dot'+(type?' '+type:'');
+  });
+  ['statusMsg','mStatusMsg'].forEach(function(id){
+    document.getElementById(id).textContent=msg;
+  });
 }
-
-function setSearchBtn(dis) {
-  var b = document.getElementById('searchBtn');
-  if (b) { b.disabled = dis; b.innerHTML = dis ? '<span class="spinner"></span>조회 중' : '검색'; }
-}
-
-// 엔터키
-document.getElementById('addrInput').addEventListener('keydown', function(e){
-  if (e.key === 'Enter') searchAddress();
-});
-document.getElementById('mAddrInput').addEventListener('keydown', function(e){
-  if (e.key === 'Enter') mobileSearch();
-});
+document.getElementById('addrInput').addEventListener('keydown',function(e){ if(e.key==='Enter') searchAddress(); });
+document.getElementById('mAddrInput').addEventListener('keydown',function(e){ if(e.key==='Enter') mobileSearch(); });
 </script>
 </body>
 </html>
