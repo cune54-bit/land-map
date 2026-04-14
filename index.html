@@ -310,8 +310,9 @@ function pnuToParams(pnu) {
   return {
     sigunguCd: pnu.substring(0, 5),
     bjdongCd:  pnu.substring(5, 10),
-    bun:       String(parseInt(pnu.substring(11, 15), 10)),
-    ji:        String(parseInt(pnu.substring(15, 19), 10))
+    platGbCd:  pnu.substring(10, 11) === '2' ? '1' : '0',
+    bun:       pnu.substring(11, 15),
+    ji:        pnu.substring(15, 19)
   };
 }
 
@@ -319,9 +320,11 @@ function pnuToParams(pnu) {
    fetchBldInfo — 핵심 수정 포인트
 
    시도 순서:
-   1) getBrTitleInfo     — 일반건축물 표제부
-   2) getBrBasisOulnInfo — 집합건축물 기본개요 (아파트·오피스텔 등)
-   3) getBrRecapTitleInfo — 총괄표제부 (여러 동)
+   1) getBrTitleInfo       — 표제부
+   2) getBrRecapTitleInfo  — 총괄표제부
+   3) getBrExposPubuseAreaInfo — 전유/공용면적
+   4) getBrExposInfo       — 전유부
+   5) getBrBasisOulnInfo   — 기본개요 (연도 없을 수 있어 최후순위)
 ══════════════════════════════════════════════ */
 async function fetchBldInfo(pnu) {
   var p = pnuToParams(pnu);
@@ -330,35 +333,84 @@ async function fetchBldInfo(pnu) {
   var baseQs = 'serviceKey=' + encodeURIComponent(BLD_KEY)
     + '&sigunguCd=' + p.sigunguCd
     + '&bjdongCd='  + p.bjdongCd
+    + '&platGbCd='  + p.platGbCd
     + '&bun='       + p.bun
-    + '&numOfRows=1&pageNo=1&_type=json';
+    + '&ji='        + p.ji
+    + '&numOfRows=100&pageNo=1&_type=json';
 
   // 공통 fetch + 파싱 헬퍼
   async function tryApi(endpoint) {
     try {
       var res  = await fetch(BLD_BASE + endpoint + '?' + baseQs);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
       var data = await res.json();
       var items = data.response && data.response.body && data.response.body.items;
-      if (!items || !items.item || items.item.length === 0) return null;
-      var item = Array.isArray(items.item) ? items.item[0] : items.item;
-      return item;
+      if (!items || !items.item) return null;
+      var list = Array.isArray(items.item) ? items.item : [items.item];
+      return list.length ? list : null;
     } catch(e) { console.warn(endpoint + ' 실패:', e.message); return null; }
   }
 
+  function chooseBestItem(items) {
+    if (!items || !items.length) return null;
+
+    var withYear = items
+      .map(function(item){
+        var year = parseYear(item.useAprDay);
+        return year ? { item: item, sortKey: String(item.useAprDay).replace(/\D/g, '') } : null;
+      })
+      .filter(Boolean)
+      .sort(function(a, b){
+        return b.sortKey.localeCompare(a.sortKey);
+      });
+
+    if (withYear.length) return withYear[0].item;
+    return items[0];
+  }
+
+  var fallbackItem = null;
+
+  async function pickFrom(endpoint) {
+    var list = await tryApi(endpoint);
+    if (!list || !list.length) return null;
+
+    var picked = chooseBestItem(list);
+    if (!fallbackItem && picked) fallbackItem = picked;
+
+    if (picked && parseYear(picked.useAprDay)) {
+      console.log('✅ ' + endpoint + ' 성공 (준공연도 포함)');
+      return picked;
+    }
+
+    console.log('ℹ️ ' + endpoint + ' 응답은 있으나 준공연도 없음');
+    return null;
+  }
+
   // 1차: 일반건축물 표제부
-  var item = await tryApi('getBrTitleInfo');
-  if (item) { console.log('✅ getBrTitleInfo 성공'); return item; }
+  var item = await pickFrom('getBrTitleInfo');
+  if (item) return item;
 
-  // 2차: 집합건축물 기본개요
-  item = await tryApi('getBrBasisOulnInfo');
-  if (item) { console.log('✅ getBrBasisOulnInfo 성공'); return item; }
+  // 2차: 총괄표제부
+  item = await pickFrom('getBrRecapTitleInfo');
+  if (item) return item;
 
-  // 3차: 총괄표제부
-  item = await tryApi('getBrRecapTitleInfo');
-  if (item) { console.log('✅ getBrRecapTitleInfo 성공'); return item; }
+  // 3차: 전유/공용면적
+  item = await pickFrom('getBrExposPubuseAreaInfo');
+  if (item) return item;
+
+  // 4차: 전유부
+  item = await pickFrom('getBrExposInfo');
+  if (item) return item;
+
+  // 5차: 기본개요는 다른 보조 정보용 fallback
+  var basisList = await tryApi('getBrBasisOulnInfo');
+  if (basisList && basisList.length) {
+    console.log('ℹ️ getBrBasisOulnInfo만 조회됨');
+    return chooseBestItem(basisList);
+  }
 
   console.warn('❌ 모든 건축물대장 API 실패 (pnu:', pnu, ')');
-  return null;
+  return fallbackItem;
 }
 
 /* ── 준공연도 파싱 ── */
