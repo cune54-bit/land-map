@@ -425,40 +425,28 @@ async function fetchBldInfo(pnu) {
   return fallbackItem;
 }
 
-/* ── VWorld WFS 필지 폴리곤 조회 ── */
+/* ── VWorld req/data 필지 폴리곤 조회 (JSONP — CORS 우회) ── */
 async function fetchParcelPolygon(pnu, lon, lat, jibunType) {
-  var BASE = 'https://api.vworld.kr/req/wfs'
-    + '?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature'
-    + '&TYPENAME=lp_pa_cbnd_bonbun'
-    + '&key=' + API_KEY + '&output=application/json';
-
   var geojson = null;
 
-  // 1차: PNU 필터
-  if (pnu && pnu.length === 19) {
-    try {
-      var r = await fetch(BASE + "&CQL_FILTER=pnu='" + pnu + "'");
-      if (r.ok) {
-        var d = await r.json();
-        if (d.features && d.features.length) geojson = d;
-      }
-    } catch(e) { console.warn('WFS PNU 쿼리 실패:', e); }
-  }
-
-  // 2차: BBOX fallback
-  if (!geojson) {
-    var delta = 0.0003;
-    var bbox = (lon-delta)+','+(lat-delta)+','+(lon+delta)+','+(lat+delta)+',EPSG:4326';
-    try {
-      var r2 = await fetch(BASE + '&BBOX=' + bbox);
-      if (r2.ok) {
-        var d2 = await r2.json();
-        if (d2.features && d2.features.length) {
-          geojson = { type: 'FeatureCollection', features: [d2.features[0]] };
-        }
-      }
-    } catch(e2) { console.warn('WFS BBOX 쿼리 실패:', e2); }
-  }
+  try {
+    var d = await jsonp('https://api.vworld.kr/req/data', {
+      service:    'data',
+      request:    'GetFeature',
+      data:       'LP_PA_CBND_BONBUN',
+      key:        API_KEY,
+      domain:     'https://cune54-bit.github.io',
+      geometry:   'true',
+      attribute:  'true',
+      geomFilter: 'POINT(' + lon + ' ' + lat + ')',
+      format:     'json'
+    });
+    if (d.response && d.response.status === 'OK'
+        && d.response.result && d.response.result.featureCollection) {
+      var fc = d.response.result.featureCollection;
+      if (fc.features && fc.features.length) geojson = fc;
+    }
+  } catch(e) { console.warn('req/data 폴리곤 조회 실패:', e); }
 
   if (!geojson) return;  // 조용히 스킵
 
@@ -486,8 +474,8 @@ var satLayer  = L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/'+API_KEY+'/Sa
 var hybridLayer = L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/'+API_KEY+'/Hybrid/{z}/{y}/{x}.png',
   {maxZoom:19,opacity:0.9});
 var cadastralLayer = L.tileLayer.wms(
-  'https://api.vworld.kr/req/wms?key=' + API_KEY,
-  {layers:'lt_c_lsdsd', format:'image/png', transparent:true, version:'1.3.0', opacity:0.8, attribution:'© VWorld 지적편집도'}
+  'https://api.vworld.kr/req/wms?key=' + API_KEY + '&domain=https://cune54-bit.github.io',
+  {layers:'lp_pa_cbnd_bonbun', format:'image/png', transparent:true, version:'1.3.0', opacity:0.9, attribution:'© VWorld 지적편집도'}
 );
 L.control.layers(
   {'🗺️ 일반지도':baseLayer,'🛰️ 위성사진':satLayer},
