@@ -212,8 +212,20 @@ var GEO_URL  = 'https://api.vworld.kr/req/address';
 var LAND_URL = 'https://api.vworld.kr/ned/data/ladfrlList';
 var BLD_BASE = 'https://apis.data.go.kr/1613000/BldRgstHubService/';
 var THIS_YEAR = new Date().getFullYear();
-var cbIdx = 0, currentMarker = null;
+var cbIdx = 0, currentMarker = null, currentPolygon = null;
 var isMobile = function(){ return window.innerWidth <= 767; };
+
+/* ── 지목 → 폴리곤 색상 ── */
+function jibunColor(type) {
+  if (!type) return '#8b949e';
+  if (/^대$|공장|창고|주차|주유/.test(type)) return '#58a6ff';   // 파랑 — 대지·산업
+  if (/전|답|과수|목장/.test(type))           return '#3fb950';   // 초록 — 농지
+  if (/임야/.test(type))                      return '#2ea043';   // 짙은 초록 — 산림
+  if (/도로|철도/.test(type))                 return '#6e7681';   // 회색 — 교통
+  if (/하천|구거|유지|양어|수도/.test(type))  return '#79c0ff';   // 하늘 — 수계
+  if (/공원|체육|유원|종교|사적|묘지/.test(type)) return '#f0883e'; // 주황 — 여가·공공
+  return '#8b949e';  // 기타
+}
 
 /* ── 모바일 패널 ── */
 var panelOpen = false;
@@ -413,6 +425,51 @@ async function fetchBldInfo(pnu) {
   return fallbackItem;
 }
 
+/* ── VWorld WFS 필지 폴리곤 조회 ── */
+async function fetchParcelPolygon(pnu, lon, lat, jibunType) {
+  var BASE = 'https://api.vworld.kr/req/wfs'
+    + '?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature'
+    + '&TYPENAME=lp_pa_cbnd_bonbun'
+    + '&key=' + API_KEY + '&output=application/json';
+
+  var geojson = null;
+
+  // 1차: PNU 필터
+  if (pnu && pnu.length === 19) {
+    try {
+      var r = await fetch(BASE + "&CQL_FILTER=pnu='" + pnu + "'");
+      if (r.ok) {
+        var d = await r.json();
+        if (d.features && d.features.length) geojson = d;
+      }
+    } catch(e) { console.warn('WFS PNU 쿼리 실패:', e); }
+  }
+
+  // 2차: BBOX fallback
+  if (!geojson) {
+    var delta = 0.0003;
+    var bbox = (lon-delta)+','+(lat-delta)+','+(lon+delta)+','+(lat+delta)+',EPSG:4326';
+    try {
+      var r2 = await fetch(BASE + '&BBOX=' + bbox);
+      if (r2.ok) {
+        var d2 = await r2.json();
+        if (d2.features && d2.features.length) {
+          geojson = { type: 'FeatureCollection', features: [d2.features[0]] };
+        }
+      }
+    } catch(e2) { console.warn('WFS BBOX 쿼리 실패:', e2); }
+  }
+
+  if (!geojson) return;  // 조용히 스킵
+
+  if (currentPolygon) { map.removeLayer(currentPolygon); currentPolygon = null; }
+
+  var color = jibunColor(jibunType);
+  currentPolygon = L.geoJSON(geojson, {
+    style: { color: color, weight: 2, opacity: 0.85, fillColor: color, fillOpacity: 0.25 }
+  }).addTo(map);
+}
+
 /* ── 준공연도 파싱 ── */
 function parseYear(useAprDay) {
   if (!useAprDay || useAprDay.trim() === '') return null;
@@ -428,9 +485,13 @@ var satLayer  = L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/'+API_KEY+'/Sa
   {maxZoom:19,attribution:'© VWorld'});
 var hybridLayer = L.tileLayer('https://api.vworld.kr/req/wmts/1.0.0/'+API_KEY+'/Hybrid/{z}/{y}/{x}.png',
   {maxZoom:19,opacity:0.9});
+var cadastralLayer = L.tileLayer.wms(
+  'https://api.vworld.kr/req/wms?key=' + API_KEY,
+  {layers:'lt_c_lsdsd', format:'image/png', transparent:true, version:'1.3.0', opacity:0.8, attribution:'© VWorld 지적편집도'}
+);
 L.control.layers(
   {'🗺️ 일반지도':baseLayer,'🛰️ 위성사진':satLayer},
-  {'📍 도로 오버레이':hybridLayer},
+  {'📍 도로 오버레이':hybridLayer,'🗂️ 지적편집도':cadastralLayer},
   {position:'topright'}
 ).addTo(map);
 
@@ -546,6 +607,7 @@ async function fetchAllInfo(lon, lat, pnu, addr){
       placeMarker(lat, lon, f, fullAddr, bldInfo);
       map.setView([lat,lon],18);
       setStatus('조회 완료 ✓','ok');
+      fetchParcelPolygon(pnu, lon, lat, f.type); // fire-and-forget
       if(isMobile()) setTimeout(function(){togglePanel(true);},500);
     } else {
       renderNoData(lon,lat,addr,pnu,'해당 필지 토지정보가 없습니다');
@@ -669,6 +731,7 @@ function clearAll(){
   el.className='m-sum-empty'; el.textContent='👆 지도를 탭해 필지를 선택하세요';
   document.getElementById('mArea').textContent='';
   if(currentMarker){map.removeLayer(currentMarker);currentMarker=null;}
+  if(currentPolygon){map.removeLayer(currentPolygon);currentPolygon=null;}
   document.getElementById('mapHint').classList.remove('hide');
   if(isMobile()) togglePanel(false);
   setStatus('지도를 클릭해 필지를 선택하세요','');
